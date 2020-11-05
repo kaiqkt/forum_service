@@ -1,0 +1,16 @@
+version: "3"
+services:
+#  dev-forum:
+#    container_name: dev-forum
+#    build: .
+#    ports:
+#      - 8080:8080
+#    links:
+#      - mongodb
+  mongodb:
+    container_name: mongo
+    image: mongo:latest
+    ports:
+      - 27018:27017
+    volumes:
+      - ./docker/mongodb/:/docker-entrypoint-initdb.d
