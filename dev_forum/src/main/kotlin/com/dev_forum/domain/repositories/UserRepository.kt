@@ -1,4 +1,4 @@
-package com.dev_forum.resources.repositories
+package com.dev_forum.domain.repositories
 
 import com.dev_forum.domain.entities.User
 import org.springframework.data.mongodb.repository.MongoRepository
