@@ -9,13 +9,12 @@ import java.util.*
 
 @Component
 class JWTUtil {
-
     @Value("\${jwt.secret}")
     private lateinit var secret: String
 
-    private val expiration: Long = 60000
+    private val expiration: Long = 3600000
 
-    fun generateToken(username: String): String {
+    fun generateToken(username: String?): String {
         return Jwts.builder()
                 .setSubject(username)
                 .setExpiration(Date(System.currentTimeMillis() + expiration))
@@ -23,31 +22,27 @@ class JWTUtil {
                 .compact()
     }
 
-    fun isTokenValid(token: String): Boolean {
-        val claims = getClaimsToken(token)
+    fun validToken(token: String): Boolean {
+        val claims = getClaims(token)
         if (claims != null) {
             val username = claims.subject
             val expirationDate = claims.expiration
             val now = Date(System.currentTimeMillis())
-            if (username != null && expirationDate != null && now.before(expirationDate)) {
-                return true
-            }
+            return username != null && expirationDate != null && now.before(expirationDate)
         }
         return false
     }
 
+    fun getUsername(token: String): String? {
+        val claims = getClaims(token)
+        return claims?.subject
+    }
 
-    private fun getClaimsToken(token: String): Claims? {
+    private fun getClaims(token: String): Claims? {
         return try {
-            Jwts.parser().setSigningKey(secret.toByteArray()).parseClaimsJws(token).body
+            Jwts.parser().setSigningKey(secret!!.toByteArray()).parseClaimsJws(token).body
         } catch (e: Exception) {
             null
         }
     }
-
-    fun getUserName(token: String): String? {
-        val claims = getClaimsToken(token)
-        return claims?.subject
-    }
-
 }

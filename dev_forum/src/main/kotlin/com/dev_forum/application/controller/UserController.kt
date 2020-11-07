@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*
 import javax.validation.Valid
 
 @RestController
-@RequestMapping("/signup")
+@RequestMapping("/user")
 class UserController (val userService: UserService) {
 
     @PostMapping
@@ -33,6 +33,15 @@ class UserController (val userService: UserService) {
         return ResponseEntity.ok().build()
     }
 
+    @GetMapping
+    fun a(): String {
+        return "aa"
+    }
+}
+
+@RestController
+@RequestMapping("/test")
+class A (val userService: UserService) {
     @GetMapping
     fun a(): String {
         return "aa"
