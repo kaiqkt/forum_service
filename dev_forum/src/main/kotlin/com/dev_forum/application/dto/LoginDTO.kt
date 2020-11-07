@@ -1,4 +1,6 @@
 package com.dev_forum.application.dto
 
-class LoginDTO {
-}
+data class LoginDTO (
+        val email: String = "",
+        val password: String = ""
+)

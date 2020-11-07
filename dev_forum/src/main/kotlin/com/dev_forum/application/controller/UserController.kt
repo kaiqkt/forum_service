@@ -7,14 +7,11 @@ import com.dev_forum.domain.service.UserService
 import com.dev_forum.domain.validation.UserRecordValidation
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.BindingResult
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import javax.validation.Valid
 
 @RestController
-@RequestMapping("/user")
+@RequestMapping("/signup")
 class UserController (val userService: UserService) {
 
     @PostMapping
@@ -31,8 +28,13 @@ class UserController (val userService: UserService) {
             return ResponseEntity.badRequest().body(response.erros.toString())
         }
 
-        var user: User = userService.save(userRequest)
+        userService.save(userRequest)
 
         return ResponseEntity.ok().build()
+    }
+
+    @GetMapping
+    fun a(): String {
+        return "aa"
     }
 }

@@ -14,7 +14,7 @@ data class UserRequest(
         val email: String = "",
 
         @get:NotEmpty(message = "Password cannot be empty.")
-        val password: String = ""
+        var password: String = ""
 ) {
     companion object {
 
