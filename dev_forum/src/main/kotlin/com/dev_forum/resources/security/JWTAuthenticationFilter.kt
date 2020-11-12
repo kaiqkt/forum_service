@@ -23,7 +23,6 @@ class JWTAuthenticationFilter(jwtUtil: JWTUtil, authenticationManager: Authentic
         return try {
             val creds = ObjectMapper().readValue(request.inputStream, LoginDTO::class.java)
             val authToken = UsernamePasswordAuthenticationToken(creds.email, creds.password, ArrayList())
-            println(authToken.authorities)
             authenticationManager.authenticate(authToken)
         } catch (e: IOException) {
             throw RuntimeException()

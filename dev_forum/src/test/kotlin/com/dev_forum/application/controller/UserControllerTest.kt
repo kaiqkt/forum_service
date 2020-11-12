@@ -16,6 +16,7 @@ class UserControllerTest {
 
     private val service = mockk<UserService>(relaxed = true)
     private val controller = UserController(userService = service)
+
     @Test
     fun `given a user request, when a email not used should status 200`() {
 
