@@ -12,6 +12,7 @@ class UserService(private val repository: UserRepository, private val bCryptPass
 
     fun save(user: UserRequest) {
         user.password = bCryptPasswordEncoder.encode(user.password)
-        repository.save(UserRequest.toDocument(user))
+        val document = UserRequest.toDocument(user)
+        repository.save(document)
     }
 }
