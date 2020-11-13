@@ -4,9 +4,11 @@ import com.dev_forum.application.dto.UserRequest
 import com.dev_forum.domain.entities.User
 import com.dev_forum.domain.entities.enum.Profile
 import com.dev_forum.domain.repositories.UserRepository
+import com.dev_forum.resources.security.UserDetailsImpl
 import io.mockk.*
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 
 
@@ -58,6 +60,24 @@ class UserServiceTest{
         service.save(request)
 
         verify { repository.save(UserRequest.toDocument(request)) }
+    }
+
+    @Test
+    fun `given a user name in security context holder when query in database should return user id`(){
+        val email = "test@test.com"
+        val document = User(
+                name = "Edward",
+                email = "test@test.com",
+                password ="123456",
+                profile = Profile.ROLE_USER,
+                id = "123456"
+        )
+
+        every { repository.findByEmail(email) } returns document
+
+        val user: String? = service.currentUser()
+
+        Assertions.assertNotNull(user)
     }
 }
 

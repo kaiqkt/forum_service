@@ -1,6 +1,7 @@
 package com.dev_forum.application.controller
 
 import com.dev_forum.application.dto.UserRequest
+import com.dev_forum.application.dto.UserResponse
 import com.dev_forum.application.response.Response
 import com.dev_forum.domain.entities.User
 import com.dev_forum.domain.service.UserService
@@ -31,5 +32,17 @@ class UserController (val userService: UserService) {
         userService.save(userRequest)
 
         return ResponseEntity.ok().build()
+    }
+
+    @GetMapping
+    fun currentUser(): ResponseEntity<Response<UserResponse>> {
+        val response: Response<UserResponse> = Response<UserResponse>()
+
+        val email = userService.currentUser()
+        val user: User? = userService.findByEmail(email)
+
+        response.data = UserResponse(user!!.name, user!!.email, user.id)
+
+        return ResponseEntity.ok().body(response)
     }
 }

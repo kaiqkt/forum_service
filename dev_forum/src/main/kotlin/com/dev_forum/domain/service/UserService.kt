@@ -18,11 +18,7 @@ class UserService(private val repository: UserRepository, private val bCryptPass
         repository.save(document)
     }
 
-    fun currentUser(): String? {
-        val user = findByEmail(authenticated()?.username)
-
-        return user?.id
-    }
+    fun currentUser() = authenticated()?.username
 
     private fun authenticated(): UserDetailsImpl? {
         return try {

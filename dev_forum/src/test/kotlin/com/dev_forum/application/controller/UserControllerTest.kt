@@ -58,5 +58,26 @@ class UserControllerTest {
 
         assertEquals(HttpStatus.BAD_REQUEST, response.statusCode)
     }
+
+    @Test
+    fun `given a current user, should return a user response`() {
+        val email = "test@test.com"
+
+        val exists = User(
+                name = "Edward",
+                email = "test@test.com",
+                password ="123456",
+                profile = Profile.ROLE_USER
+        )
+
+        every { service.currentUser() } returns "test@test.com"
+
+
+        every { service.findByEmail(email) } returns exists
+
+        val response = controller.currentUser()
+
+        assertEquals(HttpStatus.OK, response.statusCode)
+    }
 }
 
