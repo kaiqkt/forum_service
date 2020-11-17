@@ -1,48 +1,52 @@
 package com.dev_forum.application.controller
 
 import com.dev_forum.application.dto.UserRequest
-import com.dev_forum.application.dto.UserResponse
 import com.dev_forum.application.response.Response
+import com.dev_forum.application.validations.InvalidRequest
 import com.dev_forum.domain.entities.User
 import com.dev_forum.domain.service.UserService
-import com.dev_forum.domain.validation.UserRecordValidation
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.BindingResult
+import org.springframework.validation.ObjectError
 import org.springframework.web.bind.annotation.*
 import javax.validation.Valid
+import kotlin.collections.ArrayList
 
 @RestController
 @RequestMapping("/user")
-class UserController (val userService: UserService) {
+class UserController(val service: UserService) {
 
     @PostMapping
-    fun register(@Valid @RequestBody userRequest: UserRequest, result: BindingResult): ResponseEntity<String> {
+    fun register(@Valid @RequestBody userRequest: UserRequest, result: BindingResult): ResponseEntity<ArrayList<String>> {
         val response: Response<String> = Response<String>()
 
-        val exist: User? = userService.findByEmail(userRequest.email)
-        val res: BindingResult = UserRecordValidation.existingUser(exist?.email, result)
+        checkUserAvailability(userRequest.email, result)
+        InvalidRequest.check(response, result)
 
-        if (res.hasErrors()){
-            result.allErrors.forEach { erro ->
-                erro.defaultMessage?.let { response.erros.add(it) }
-            }
-            return ResponseEntity.badRequest().body(response.erros.toString())
+        if (response.erros.isNotEmpty()) {
+            return ResponseEntity.badRequest().body(response.erros)
         }
-
-        userService.save(userRequest)
+        service.save(userRequest)
 
         return ResponseEntity.ok().build()
     }
 
     @GetMapping
-    fun currentUser(): ResponseEntity<Response<UserResponse>> {
-        val response: Response<UserResponse> = Response<UserResponse>()
+    fun currentUser(): ResponseEntity<Map<String, User?>> {
+        val response: Response<Map<String, User?>> = Response<Map<String, User?>>()
+        response.data = view(service.currentUser())
+        return ResponseEntity.ok().body(response.data)
+    }
 
-        val email = userService.currentUser()
-        val user: User? = userService.findByEmail(email)
+    private fun view(user: User?) = mapOf("user" to user)
 
-        response.data = UserResponse(user!!.name, user!!.email, user.id)
-
-        return ResponseEntity.ok().body(response)
+    private fun checkUserAvailability(email: String, result: BindingResult): BindingResult {
+        email.let { email ->
+            if (service.existsByEmail(email)) {
+                result.addError(ObjectError("user", "Email already use."))
+                return result
+            }
+        }
+        return result
     }
 }

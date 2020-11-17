@@ -1,7 +1,7 @@
 package com.dev_forum.resources.security
 
 import com.dev_forum.application.dto.LoginDTO
-import com.dev_forum.application.response.UserResponse
+import com.dev_forum.domain.entities.User
 import com.dev_forum.domain.repositories.UserRepository
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.security.authentication.AuthenticationManager
@@ -46,7 +46,7 @@ class JWTAuthenticationFilter(jwtUtil: JWTUtil, authenticationManager: Authentic
     private fun json(email: String): String {
         val user = userRepository.findByEmail(email)
 
-        return UserResponse.toJson(user)
+        return User.toJson(user)
     }
 
     private inner class JWTAuthenticationFailureHandler : AuthenticationFailureHandler {

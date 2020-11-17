@@ -1,6 +1,7 @@
 package com.dev_forum.domain.service
 
 import com.dev_forum.application.dto.UserRequest
+import com.dev_forum.domain.entities.User
 import com.dev_forum.domain.repositories.UserRepository
 import com.dev_forum.resources.security.UserDetailsImpl
 import org.springframework.security.core.context.SecurityContextHolder
@@ -18,7 +19,10 @@ class UserService(private val repository: UserRepository, private val bCryptPass
         repository.save(document)
     }
 
-    fun currentUser() = authenticated()?.username
+    fun existsByEmail(email: String?) = repository.existsByEmail(email)
+
+    fun currentUser() = findByEmail(authenticated()?.username)
+
 
     private fun authenticated(): UserDetailsImpl? {
         return try {
