@@ -1,6 +1,8 @@
 package com.dev_forum.resources.security
 
 import com.dev_forum.application.dto.LoginDTO
+import com.dev_forum.application.response.UserResponse
+import com.dev_forum.domain.repositories.UserRepository
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
@@ -15,8 +17,9 @@ import javax.servlet.ServletException
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
-class JWTAuthenticationFilter(jwtUtil: JWTUtil, authenticationManager: AuthenticationManager) : UsernamePasswordAuthenticationFilter() {
+class JWTAuthenticationFilter(jwtUtil: JWTUtil, authenticationManager: AuthenticationManager, userRepository: UserRepository) : UsernamePasswordAuthenticationFilter() {
     private val jwtUtil: JWTUtil
+    private val userRepository: UserRepository
 
     @Throws(AuthenticationException::class)
     override fun attemptAuthentication(request: HttpServletRequest, response: HttpServletResponse): Authentication {
@@ -31,10 +34,19 @@ class JWTAuthenticationFilter(jwtUtil: JWTUtil, authenticationManager: Authentic
 
     @Throws(IOException::class, ServletException::class)
     override fun successfulAuthentication(request: HttpServletRequest, response: HttpServletResponse, chain: FilterChain, authResult: Authentication) {
-        val username: String = (authResult.principal as UserDetailsImpl).getUsername()
+        val username: String = (authResult.principal as UserDetailsImpl).username
         val token = jwtUtil.generateToken(username)
-        response.addHeader("Authorization", "Bearer $token")
+        response.contentType = "application/json"
+        response.writer.append(json(username))
+        response.addHeader("Authorization", "$token")
+        println("colocar \"Bearer $token\"")
         response.addHeader("access-control-expose-headers", "Authorization")
+    }
+
+    private fun json(email: String): String {
+        val user = userRepository.findByEmail(email)
+
+        return UserResponse.toJson(user)
     }
 
     private inner class JWTAuthenticationFailureHandler : AuthenticationFailureHandler {
@@ -59,5 +71,6 @@ class JWTAuthenticationFilter(jwtUtil: JWTUtil, authenticationManager: Authentic
         setAuthenticationFailureHandler(JWTAuthenticationFailureHandler())
         this.jwtUtil = jwtUtil
         this.authenticationManager = authenticationManager
+        this. userRepository = userRepository
     }
 }

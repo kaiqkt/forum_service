@@ -1,5 +1,7 @@
 package com.dev_forum.resources.security
 
+import com.dev_forum.domain.repositories.UserRepository
+import com.dev_forum.domain.service.UserService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -27,13 +29,16 @@ class SecurityConfig : WebSecurityConfigurerAdapter() {
     @Autowired
     private lateinit var jwtUtil: JWTUtil
 
+    @Autowired
+    private lateinit var userRepository: UserRepository
+
     @Throws(Exception::class)
     override fun configure(http: HttpSecurity) {
         http.cors().and().csrf().disable()
         http.authorizeRequests()
                 .antMatchers(HttpMethod.POST, *PUBLIC_MATCHERS).permitAll()
                 .anyRequest().authenticated()
-        http.addFilter(JWTAuthenticationFilter(jwtUtil, authenticationManager()))
+        http.addFilter(JWTAuthenticationFilter(jwtUtil, authenticationManager(), userRepository))
         http.addFilter(JWTAuthorizationFilter(authenticationManager(), jwtUtil, userDetailsService!!))
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
     }
