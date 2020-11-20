@@ -10,7 +10,7 @@ data class User(
         val name: String,
         val email: String,
         @JsonIgnore
-        val password: String,
+        var password: String,
         @JsonIgnore
         val profile: Profile,
         @Id val id: String? = null

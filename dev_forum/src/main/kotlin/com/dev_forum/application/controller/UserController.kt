@@ -10,21 +10,20 @@ import org.springframework.validation.BindingResult
 import org.springframework.validation.ObjectError
 import org.springframework.web.bind.annotation.*
 import javax.validation.Valid
-import kotlin.collections.ArrayList
 
 @RestController
 @RequestMapping("/user")
 class UserController(val service: UserService) {
 
     @PostMapping
-    fun register(@Valid @RequestBody userRequest: UserRequest, result: BindingResult): ResponseEntity<ArrayList<String>> {
+    fun register(@Valid @RequestBody userRequest: UserRequest, result: BindingResult): ResponseEntity<Response<String>> {
         val response: Response<String> = Response<String>()
 
         checkUserAvailability(userRequest.email, result)
         InvalidRequest.check(response, result)
 
         if (response.erros.isNotEmpty()) {
-            return ResponseEntity.badRequest().body(response.erros)
+            return ResponseEntity.badRequest().body(response)
         }
         service.save(userRequest)
 
@@ -32,10 +31,10 @@ class UserController(val service: UserService) {
     }
 
     @GetMapping
-    fun currentUser(): ResponseEntity<Map<String, User?>> {
+    fun currentUser(): ResponseEntity<Response<Map<String, User?>>> {
         val response: Response<Map<String, User?>> = Response<Map<String, User?>>()
         response.data = view(service.currentUser())
-        return ResponseEntity.ok().body(response.data)
+        return ResponseEntity.ok().body(response)
     }
 
     private fun view(user: User?) = mapOf("user" to user)

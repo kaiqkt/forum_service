@@ -64,7 +64,8 @@ class SecurityConfig : WebSecurityConfigurerAdapter() {
 
     companion object {
         private val PUBLIC_MATCHERS = arrayOf(
-                "/user"
+                "/user",
+                "/reset/**"
         )
     }
 }
