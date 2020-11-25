@@ -36,7 +36,8 @@ class SecurityConfig : WebSecurityConfigurerAdapter() {
     override fun configure(http: HttpSecurity) {
         http.cors().and().csrf().disable()
         http.authorizeRequests()
-                .antMatchers(HttpMethod.POST, *PUBLIC_MATCHERS).permitAll()
+                .antMatchers(HttpMethod.POST, *POST_MATCHERS).permitAll()
+                .antMatchers(HttpMethod.GET, *GET_MATCHERS).permitAll()
                 .anyRequest().authenticated()
         http.addFilter(JWTAuthenticationFilter(jwtUtil, authenticationManager(), userRepository))
         http.addFilter(JWTAuthorizationFilter(authenticationManager(), jwtUtil, userDetailsService!!))
@@ -63,9 +64,13 @@ class SecurityConfig : WebSecurityConfigurerAdapter() {
     }
 
     companion object {
-        private val PUBLIC_MATCHERS = arrayOf(
+        private val POST_MATCHERS = arrayOf(
                 "/user",
                 "/reset/**"
+        )
+
+        private val GET_MATCHERS = arrayOf(
+                "/reset/token/**"
         )
     }
 }

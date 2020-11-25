@@ -36,17 +36,25 @@ class ResetPasswordController(val userService: UserService, val emailService: Em
         return ResponseEntity.ok().build()
     }
 
+    @GetMapping("/token/{token}")
+    fun token(@PathVariable token: String): ResponseEntity<Response<String>> {
+        val response: Response<String> = Response<String>()
+
+        val result = userService.validatePasswordResetToken(token)
+
+        if (result != null) {
+            response.erros = arrayListOf("Token invalid $result.")
+            return ResponseEntity.badRequest().body(response)
+        }
+
+        return ResponseEntity.ok().build()
+    }
+
     @PostMapping("/change")
     fun new(@RequestBody passwordDto: PasswordDTO): ResponseEntity<Response<String>> {
         val response: Response<String> = Response<String>()
 
-        val result = userService.validatePasswordResetToken(passwordDto.token)
         val user = userService.findUserByToken(passwordDto.token)
-
-        if (result != null) {
-            response.erros = arrayListOf("Token invalid $result.")
-            return ResponseEntity.unprocessableEntity().body(response)
-        }
 
         return if (user != null) {
             userService.changeUserPassword(user, passwordDto.password)
