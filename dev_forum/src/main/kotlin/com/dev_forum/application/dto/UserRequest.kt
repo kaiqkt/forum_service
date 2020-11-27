@@ -8,14 +8,14 @@ import javax.validation.constraints.NotEmpty
 
 data class UserRequest(
         @get:NotEmpty(message = "Name cannot be empty.")
-        val name: String? = "",
+        val name: String? = null,
 
         @get:NotEmpty(message = "Email cannot be empty.")
         @get:Email(message = "Invalid email.")
-        val email: String? = "",
+        val email: String? = null,
 
         @get:NotEmpty(message = "Password cannot be empty.")
-        var password: String? = ""
+        var password: String? = null
 ) {
     companion object {
 
