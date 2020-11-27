@@ -6,9 +6,12 @@ import com.dev_forum.domain.entities.User
 import com.dev_forum.domain.repositories.PasswordResetTokenRepository
 import com.dev_forum.domain.repositories.UserRepository
 import com.dev_forum.resources.security.UserDetailsImpl
+import org.bson.BsonBinarySubType
+import org.bson.types.Binary
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.stereotype.Service
+import org.springframework.web.multipart.MultipartFile
 import java.util.*
 
 
@@ -25,12 +28,19 @@ class UserService(private val repository: UserRepository,
         val document = UserRequest.toDocument(user)
         repository.save(document)
     }
+//    return Base64.getEncoder().encodeToString(photo.getImage().getData());
 
     fun update(user: User?) {
         repository.save(user)
     }
 
+    fun findByUsername(userName: String) = repository.findByUserName(userName)
+
+    fun findByName(name: String) = repository.findByName(name)
+
     fun existsByEmail(email: String?) = repository.existsByEmail(email)
+
+    fun existsByUserName(u: String?) = repository.existsByUserName(u)
 
     fun currentUser() = findByEmail(authenticated()?.username)
 

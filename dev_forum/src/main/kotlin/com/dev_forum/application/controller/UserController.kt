@@ -1,13 +1,17 @@
 package com.dev_forum.application.controller
 
+import com.dev_forum.application.dto.Author
 import com.dev_forum.application.dto.UpdateUser
 import com.dev_forum.application.dto.UserRequest
 import com.dev_forum.application.response.Response
 import com.dev_forum.application.validations.InvalidRequest
+import com.dev_forum.domain.entities.Article
 import com.dev_forum.domain.entities.User
 import com.dev_forum.domain.service.UserService
 import com.dev_forum.resources.security.JWTUtil
 import com.fasterxml.jackson.annotation.JsonIgnore
+import org.bson.BsonBinarySubType
+import org.bson.types.Binary
 import org.springframework.data.annotation.Id
 import org.springframework.http.ResponseEntity
 import org.springframework.security.crypto.bcrypt.BCrypt
@@ -16,6 +20,7 @@ import org.springframework.validation.BindingResult
 import org.springframework.validation.FieldError
 import org.springframework.validation.ObjectError
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.multipart.MultipartFile
 import javax.validation.Valid
 
 @RestController
@@ -27,7 +32,7 @@ class UserController(val service: UserService, val jwt: JWTUtil) {
     fun register(@Valid @RequestBody userRequest: UserRequest, result: BindingResult): ResponseEntity<Response<Any>> {
         val response: Response<Any> = Response<Any>()
 
-        checkUserAvailability(userRequest.email, result)
+        checkUserAvailability(userRequest?.username, userRequest?.email, result)
         InvalidRequest.check(response, result)
 
         if (response.erros.isNotEmpty()) {
@@ -39,9 +44,10 @@ class UserController(val service: UserService, val jwt: JWTUtil) {
     }
 
     @GetMapping
-    fun currentUser(): ResponseEntity<Response<Map<String, User?>>> {
-        val response: Response<Map<String, User?>> = Response<Map<String, User?>>()
-        response.data = view(service.currentUser())
+    fun currentUser(): ResponseEntity<Response<Map<String, Author?>>> {
+        val response: Response<Map<String, Author?>> = Response<Map<String, Author?>>()
+        val u = service.currentUser()
+        response.data = (view(Author(u?.name, u?.email, u?.id)))
         return ResponseEntity.ok().body(response)
     }
 
@@ -51,8 +57,7 @@ class UserController(val service: UserService, val jwt: JWTUtil) {
 
         val currentUser = service.currentUser()
 
-        checkUserAvailability(user?.email, result
-        )
+        checkUserAvailability(user?.username, user?.email, result)
         InvalidRequest.check(response, result)
 
         if (response.erros.isNotEmpty()) {
@@ -65,24 +70,33 @@ class UserController(val service: UserService, val jwt: JWTUtil) {
         val u = currentUser?.copy(
                 name = user.name ?: currentUser.name,
                 email = user?.email ?: currentUser.email,
+                image = user?.image ?: currentUser.image,
+                bio = user?.bio ?: currentUser.bio,
                 password = newPassword(user?.password) ?: currentUser.password,
                 profile = currentUser.profile,
                 id = currentUser.id
         )
 
         service.update(u)
-        response.data = u
+        response.data = (viewUpdate(u))
         val token = jwt.generateToken(u?.email)
 
         return ResponseEntity.ok().header("Authorization", "$token").body(response);
     }
 
-    private fun view(user: User?) = mapOf("user" to user)
+    private fun viewUpdate(user: User?) = mapOf("user" to user)
+    private fun view(user: Author?) = mapOf("user" to user)
 
-    private fun checkUserAvailability(email: String?, result: BindingResult): BindingResult {
-        email.let { email ->
+    private fun checkUserAvailability(u: String?, e: String?, result: BindingResult): BindingResult {
+        e?.let { email ->
             if (service.existsByEmail(email)) {
                 result.addError(ObjectError("user", "Email already use."))
+                return result
+            }
+        }
+        u?.let { email ->
+            if (service.existsByUserName(email)) {
+                result.addError(ObjectError("user", "Username already use."))
                 return result
             }
         }
