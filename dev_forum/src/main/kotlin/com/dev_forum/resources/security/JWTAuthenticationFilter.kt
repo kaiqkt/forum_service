@@ -34,7 +34,7 @@ class JWTAuthenticationFilter(jwtUtil: JWTUtil, authenticationManager: Authentic
 
     @Throws(IOException::class, ServletException::class)
     override fun successfulAuthentication(request: HttpServletRequest, response: HttpServletResponse, chain: FilterChain, authResult: Authentication) {
-        val username: String = (authResult.principal as UserDetailsImpl).username
+        val username: String? = (authResult.principal as UserDetailsImpl).username
         val token = jwtUtil.generateToken(username)
         response.contentType = "application/json"
         response.writer.append(json(username))
@@ -43,7 +43,7 @@ class JWTAuthenticationFilter(jwtUtil: JWTUtil, authenticationManager: Authentic
         response.addHeader("access-control-expose-headers", "Authorization")
     }
 
-    private fun json(email: String): String {
+    private fun json(email: String?): String {
         val user = userRepository.findByEmail(email)
 
         return User.toJson(user)

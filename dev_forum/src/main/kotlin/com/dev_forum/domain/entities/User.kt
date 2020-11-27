@@ -7,12 +7,12 @@ import org.springframework.data.mongodb.core.mapping.Document
 
 @Document
 data class User(
-        val name: String,
-        val email: String,
+        val name: String?,
+        val email: String?,
         @JsonIgnore
-        var password: String,
+        var password: String?,
         @JsonIgnore
-        val profile: Profile,
+        val profile: Profile?,
         @Id val id: String? = null
 ) {
         companion object {

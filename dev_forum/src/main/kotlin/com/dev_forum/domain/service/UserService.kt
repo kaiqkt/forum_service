@@ -26,6 +26,10 @@ class UserService(private val repository: UserRepository,
         repository.save(document)
     }
 
+    fun update(user: User?) {
+        repository.save(user)
+    }
+
     fun existsByEmail(email: String?) = repository.existsByEmail(email)
 
     fun currentUser() = findByEmail(authenticated()?.username)
