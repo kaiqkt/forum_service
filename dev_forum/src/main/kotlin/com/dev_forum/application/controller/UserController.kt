@@ -47,7 +47,7 @@ class UserController(val service: UserService, val jwt: JWTUtil) {
     fun currentUser(): ResponseEntity<Response<Map<String, Author?>>> {
         val response: Response<Map<String, Author?>> = Response<Map<String, Author?>>()
         val u = service.currentUser()
-        response.data = (view(Author(u?.name, u?.email, u?.id)))
+        response.data = (view(Author(u?.name, u?.image, u?.id, u?.email)))
         return ResponseEntity.ok().body(response)
     }
 

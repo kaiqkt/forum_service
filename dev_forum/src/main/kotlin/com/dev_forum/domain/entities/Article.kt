@@ -1,6 +1,7 @@
 package com.dev_forum.domain.entities
 
 import com.dev_forum.application.dto.Author
+import com.fasterxml.jackson.annotation.JsonIgnore
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 import java.time.LocalDateTime
@@ -19,6 +20,7 @@ data class Article(
         //Usuarios que curtiram o post
         var favorited: MutableList<User> = mutableListOf(),
         var author: Author,
+        @JsonIgnore
         @Id
         var id: String? = null
 )

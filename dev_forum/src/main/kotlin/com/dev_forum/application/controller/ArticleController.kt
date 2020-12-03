@@ -3,6 +3,8 @@ package com.dev_forum.application.controller
 import com.dev_forum.application.dto.Author
 import com.github.slugify.Slugify
 import com.dev_forum.application.dto.NewArticle
+import com.dev_forum.application.dto.UpdateArticle
+import com.dev_forum.application.dto.UpdateUser
 import com.dev_forum.application.response.Response
 import com.dev_forum.application.validations.InvalidRequest
 import com.dev_forum.domain.entities.Article
@@ -13,9 +15,11 @@ import com.dev_forum.domain.service.ArticleService
 import com.dev_forum.domain.service.UserService
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.BindingResult
 import org.springframework.web.bind.annotation.*
+import java.time.LocalDateTime
 import java.util.*
 import javax.validation.Valid
 
@@ -39,7 +43,6 @@ class ArticleController(
         val p = PageRequest.of(offset, limit, Sort.Direction.DESC, "createdAt")
         val a = articleService.findBy(tag, author, favorited, p)
 
-        println(articleRepository.findByTagListName(tag, p))
         response.data = (articlesView(a))
 
         return ResponseEntity.ok(response)
@@ -58,6 +61,17 @@ class ArticleController(
         response.data = (articlesView(page))
 
         return ResponseEntity.ok(response)
+    }
+
+    @GetMapping("/{slug}")
+    fun article(@PathVariable slug: String): ResponseEntity<Response<Any>>{
+        val response: Response<Any> = Response<Any>()
+
+        articleRepository.findBySlug(slug)?.let {
+            response.data = articleView(it)
+            return ResponseEntity.ok(response)
+        }
+        return ResponseEntity.notFound().build()
     }
 
     @PostMapping()
@@ -83,7 +97,10 @@ class ArticleController(
         }
 
         val article = NewArticle.toDocument(newArticle, slug,
-                Author(name = currentUser?.name, email = currentUser?.email, id = currentUser?.id), tagList)
+                Author(name = currentUser?.name,
+                        email = currentUser?.email,
+                        id = currentUser?.id,
+                        image = currentUser?.image), tagList)
 
         articleRepository.save(article)
         response.data = (articleView(article))
@@ -91,10 +108,48 @@ class ArticleController(
         return ResponseEntity.ok().body(response)
     }
 
-    fun articleView(article: Article)
-            = mapOf("article" to article)
+    @PutMapping("/{slug}")
+    fun updateArticle(@PathVariable slug: String, @Valid @RequestBody article: UpdateArticle, result: BindingResult): ResponseEntity<Response<Any>> {
+        val response: Response<Any> = Response<Any>()
 
-    fun articlesView(articles: List<Article>)
-            = mapOf("articles" to articles,
+        articleRepository.findBySlug(slug)?.let {
+            val user = userService.currentUser()
+            if (it?.author?.id != user?.id){
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
+            }
+
+            var slug: String? = it.slug
+            article.title?.let { newTitle ->
+                if (newTitle != it?.title) {
+                    slug = Slugify().slugify(article.title)
+                    if (articleRepository.existsBySlug(slug!!)){
+                        slug += "-" + UUID.randomUUID().toString().substring(0, 8)
+                    }
+                }
+            }
+
+            val tagList = article.tagList?.map {
+                tagRepository.findByName(it) ?: tagRepository.save(Tag(name = it))
+            }
+
+            val update = it.copy(
+                    slug = slug,
+                    title = article.title ?: it.title,
+                    description = article.description ?: it.description,
+                    body = article.body ?: it.body,
+                    updatedAt = LocalDateTime.now(),
+                    tagList = if (tagList.isNullOrEmpty()) it.tagList else tagList.toMutableList()
+            )
+
+            articleRepository.save(update)
+            response.data = articleView(update)
+            return ResponseEntity.ok().body(response)
+        }
+        return ResponseEntity.notFound().build()
+    }
+
+    fun articleView(article: Article) = mapOf("article" to article)
+
+    fun articlesView(articles: List<Article>) = mapOf("articles" to articles,
             "articlesCount" to articles.size)
 }
