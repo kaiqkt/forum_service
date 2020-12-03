@@ -6,4 +6,5 @@ import java.time.OffsetDateTime
 data class Comment(var createdAt: OffsetDateTime = OffsetDateTime.now(),
                    var updatedAt: OffsetDateTime = OffsetDateTime.now(),
                    var body: String = "",
-                   var author: Author)
+                   var author: Author,
+                   var id: String)

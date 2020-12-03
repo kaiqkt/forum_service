@@ -182,11 +182,34 @@ class ArticleController(
 
         articleRepository.findBySlug(slug)?.let {
             val user = userService.currentUser()
-            val newComment = Comment(body = comment.body!!, author = Author(id = user?.id, image = user?.image, email = user?.email, name = user?.name))
+            val newComment = Comment(
+                    body = comment.body!!,
+                    author = Author(id = user?.id, image = user?.image, email = user?.email, name = user?.name),
+                    id = UUID.randomUUID().toString())
             it.comments.add(newComment)
             articleRepository.save(it)
             response.data = commentView(newComment)
             return ResponseEntity.ok().body(response)
+        }
+        return ResponseEntity.notFound().build()
+    }
+
+    @DeleteMapping("/{slug}/comments/{id}")
+    fun deleteComment(@PathVariable slug: String, @PathVariable id: String): ResponseEntity<Any> {
+        articleRepository.findBySlug(slug)?.let {
+            val user = userService.currentUser()
+            it.comments.map { c ->
+                if (c.id == id) {
+                    return if (c.author.id.equals(user?.id)){
+                        it.comments.remove(c)
+                        articleRepository.save(it)
+                        ResponseEntity.ok().build()
+                    } else {
+                        ResponseEntity.status(HttpStatus.FORBIDDEN).build()
+                    }
+                }
+            }
+            return ResponseEntity.notFound().build()
         }
         return ResponseEntity.notFound().build()
     }
