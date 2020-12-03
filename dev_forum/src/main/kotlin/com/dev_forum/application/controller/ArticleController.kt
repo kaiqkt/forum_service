@@ -1,13 +1,11 @@
 package com.dev_forum.application.controller
 
-import com.dev_forum.application.dto.Author
+import com.dev_forum.application.dto.*
 import com.github.slugify.Slugify
-import com.dev_forum.application.dto.NewArticle
-import com.dev_forum.application.dto.UpdateArticle
-import com.dev_forum.application.dto.UpdateUser
 import com.dev_forum.application.response.Response
 import com.dev_forum.application.validations.InvalidRequest
 import com.dev_forum.domain.entities.Article
+import com.dev_forum.domain.entities.Comment
 import com.dev_forum.domain.entities.Tag
 import com.dev_forum.domain.repositories.ArticleRepository
 import com.dev_forum.domain.repositories.TagRepository
@@ -148,8 +146,58 @@ class ArticleController(
         return ResponseEntity.notFound().build()
     }
 
+    @DeleteMapping("/{slug}")
+    fun deleteArticle(@PathVariable slug: String): ResponseEntity<Response<Any>> {
+        articleRepository.findBySlug(slug)?.let {
+            if(it?.author?.id != userService.currentUser()?.id) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
+            }
+
+        }
+        return ResponseEntity.notFound().build()
+    }
+
+    @GetMapping("/{slug}/comments")
+    fun articleComments(@PathVariable slug: String): ResponseEntity<Response<Any>>{
+        val response: Response<Any> = Response<Any>()
+        articleRepository.findBySlug(slug)?.let {
+            val user = userService.currentUser()
+            val comments = articleRepository.findByOrderByCreatedAtDesc()
+            response.data = commentsView(comments)
+
+            return ResponseEntity.ok().body(response)
+        }
+        return ResponseEntity.notFound().build()
+    }
+
+    @PostMapping("/{slug}/comments")
+    fun addComment(@PathVariable slug: String, @Valid @RequestBody comment: NewComment, result: BindingResult): ResponseEntity<Response<Any>> {
+        val response: Response<Any> = Response<Any>()
+
+        InvalidRequest.check(response, result)
+
+        if (response.erros.isNotEmpty()) {
+            return ResponseEntity.badRequest().body(response)
+        }
+
+        articleRepository.findBySlug(slug)?.let {
+            val user = userService.currentUser()
+            val newComment = Comment(body = comment.body!!, author = Author(id = user?.id, image = user?.image, email = user?.email, name = user?.name))
+            it.comments.add(newComment)
+            articleRepository.save(it)
+            response.data = commentView(newComment)
+            return ResponseEntity.ok().body(response)
+        }
+        return ResponseEntity.notFound().build()
+    }
+
     fun articleView(article: Article) = mapOf("article" to article)
 
     fun articlesView(articles: List<Article>) = mapOf("articles" to articles,
             "articlesCount" to articles.size)
+
+    fun commentView(comment: Comment) = mapOf("article" to comment)
+
+    fun commentsView(comments: List<Comment>) = mapOf("comments" to comments,
+            "articlesCount" to comments.size)
 }

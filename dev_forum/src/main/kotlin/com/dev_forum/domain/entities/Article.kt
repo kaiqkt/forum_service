@@ -17,10 +17,13 @@ data class Article(
         val tagList: MutableList<Tag> = mutableListOf(),
         var createdAt: LocalDateTime = LocalDateTime.now(),
         var updatedAt: LocalDateTime = LocalDateTime.now(),
+        var comments: MutableList<Comment> = mutableListOf(),
         //Usuarios que curtiram o post
         var favorited: MutableList<User> = mutableListOf(),
         var author: Author,
         @JsonIgnore
         @Id
         var id: String? = null
-)
+) {
+        fun favoritesCount() = favorited.size
+}
