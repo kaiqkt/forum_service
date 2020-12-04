@@ -19,7 +19,7 @@ data class Article(
         var updatedAt: LocalDateTime = LocalDateTime.now(),
         var comments: MutableList<Comment> = mutableListOf(),
         //Usuarios que curtiram o post
-        var favorited: MutableList<User> = mutableListOf(),
+        var favorited: MutableList<User?> = mutableListOf(),
         var author: Author,
         @JsonIgnore
         @Id

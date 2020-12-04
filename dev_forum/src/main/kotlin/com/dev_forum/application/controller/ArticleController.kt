@@ -214,6 +214,38 @@ class ArticleController(
         return ResponseEntity.notFound().build()
     }
 
+    @PostMapping("/{slug}/favorite")
+    fun favoriteArticle(@PathVariable slug: String): ResponseEntity<Response<Any>> {
+        val response: Response<Any> = Response<Any>()
+
+        articleRepository.findBySlug(slug)?.let {
+            val user = userService.currentUser()
+            if (!it.favorited.contains(user)){
+                it.favorited.add(user)
+                articleRepository.save(it)
+                response.data = articleView(it)
+                return ResponseEntity.ok().body(response)
+            }
+        }
+        return ResponseEntity.notFound().build()
+    }
+
+    @DeleteMapping("/{slug}/favorite")
+    fun unfavoriteArticle(@PathVariable slug: String): ResponseEntity<Response<Any>>{
+        val response: Response<Any> = Response<Any>()
+
+        articleRepository.findBySlug(slug)?.let {
+            val user = userService.currentUser()
+            if (it.favorited.contains(user)){
+                it.favorited.remove(user)
+                articleRepository.save(it)
+                response.data = articleView(it)
+                return ResponseEntity.ok().body(response)
+            }
+        }
+        return ResponseEntity.notFound().build()
+    }
+
     fun articleView(article: Article) = mapOf("article" to article)
 
     fun articlesView(articles: List<Article>) = mapOf("articles" to articles,
