@@ -15,5 +15,4 @@ interface ArticleRepository : MongoRepository<Article, String>{
     fun findByFavorited(fav: String, pageable: Pageable): List<Article>
     fun findBySlug(slug: String): Article?
     fun findByAuthorIdInOrderByCreatedAtDesc(ids: List<String?>?, pageable: Pageable): List<Article>
-    fun findByOrderByCreatedAtDesc(): List<Comment>
 }

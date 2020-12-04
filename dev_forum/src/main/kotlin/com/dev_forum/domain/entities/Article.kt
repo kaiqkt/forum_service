@@ -6,6 +6,9 @@ import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 import java.time.LocalDateTime
 import java.time.OffsetDateTime
+import java.time.format.DateTimeFormatter
+
+val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
 
 @Document
 data class Article(
@@ -15,8 +18,8 @@ data class Article(
         var body: String? = "",
         //Lista de tags
         val tagList: MutableList<Tag> = mutableListOf(),
-        var createdAt: LocalDateTime = LocalDateTime.now(),
-        var updatedAt: LocalDateTime = LocalDateTime.now(),
+        var createdAt: String = formatter.format(LocalDateTime.now()),
+        var updatedAt: String = formatter.format(LocalDateTime.now()),
         var comments: MutableList<Comment> = mutableListOf(),
         //Usuarios que curtiram o post
         var favorited: MutableList<User?> = mutableListOf(),

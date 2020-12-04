@@ -18,6 +18,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.validation.BindingResult
 import org.springframework.web.bind.annotation.*
 import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.*
 import javax.validation.Valid
 
@@ -109,6 +110,7 @@ class ArticleController(
     @PutMapping("/{slug}")
     fun updateArticle(@PathVariable slug: String, @Valid @RequestBody article: UpdateArticle, result: BindingResult): ResponseEntity<Response<Any>> {
         val response: Response<Any> = Response<Any>()
+        val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
 
         articleRepository.findBySlug(slug)?.let {
             val user = userService.currentUser()
@@ -135,7 +137,7 @@ class ArticleController(
                     title = article.title ?: it.title,
                     description = article.description ?: it.description,
                     body = article.body ?: it.body,
-                    updatedAt = LocalDateTime.now(),
+                    updatedAt = formatter.format(LocalDateTime.now()),
                     tagList = if (tagList.isNullOrEmpty()) it.tagList else tagList.toMutableList()
             )
 
@@ -147,12 +149,13 @@ class ArticleController(
     }
 
     @DeleteMapping("/{slug}")
-    fun deleteArticle(@PathVariable slug: String): ResponseEntity<Response<Any>> {
+    fun deleteArticle(@PathVariable slug: String): ResponseEntity<Any> {
         articleRepository.findBySlug(slug)?.let {
             if(it?.author?.id != userService.currentUser()?.id) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
             }
-
+            articleRepository.delete(it)
+            return ResponseEntity.ok().build()
         }
         return ResponseEntity.notFound().build()
     }
@@ -162,7 +165,7 @@ class ArticleController(
         val response: Response<Any> = Response<Any>()
         articleRepository.findBySlug(slug)?.let {
             val user = userService.currentUser()
-            val comments = articleRepository.findByOrderByCreatedAtDesc()
+            val comments = it.comments.asReversed()
             response.data = commentsView(comments)
 
             return ResponseEntity.ok().body(response)
