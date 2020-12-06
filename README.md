@@ -5,7 +5,7 @@
 Use the command below for raise the docker container with MongoDB
 
 ```
-gradle composeUp run
+docker-compose up
 ```
 
 Use the command below for start the application
