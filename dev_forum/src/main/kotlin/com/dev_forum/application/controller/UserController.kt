@@ -5,22 +5,15 @@ import com.dev_forum.application.dto.UpdateUser
 import com.dev_forum.application.dto.UserRequest
 import com.dev_forum.application.response.Response
 import com.dev_forum.application.validations.InvalidRequest
-import com.dev_forum.domain.entities.Article
 import com.dev_forum.domain.entities.User
 import com.dev_forum.domain.service.UserService
 import com.dev_forum.resources.security.JWTUtil
-import com.fasterxml.jackson.annotation.JsonIgnore
-import org.bson.BsonBinarySubType
-import org.bson.types.Binary
-import org.springframework.data.annotation.Id
 import org.springframework.http.ResponseEntity
 import org.springframework.security.crypto.bcrypt.BCrypt
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.validation.BindingResult
 import org.springframework.validation.FieldError
 import org.springframework.validation.ObjectError
 import org.springframework.web.bind.annotation.*
-import org.springframework.web.multipart.MultipartFile
 import javax.validation.Valid
 
 @RestController

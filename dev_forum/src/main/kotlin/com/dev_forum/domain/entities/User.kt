@@ -2,7 +2,6 @@ package com.dev_forum.domain.entities
 
 import com.dev_forum.domain.entities.enum.Profile
 import com.fasterxml.jackson.annotation.JsonIgnore
-import org.bson.types.Binary
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 

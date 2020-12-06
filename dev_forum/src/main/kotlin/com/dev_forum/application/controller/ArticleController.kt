@@ -1,7 +1,9 @@
 package com.dev_forum.application.controller
 
-import com.dev_forum.application.dto.*
-import com.github.slugify.Slugify
+import com.dev_forum.application.dto.Author
+import com.dev_forum.application.dto.NewArticle
+import com.dev_forum.application.dto.NewComment
+import com.dev_forum.application.dto.UpdateArticle
 import com.dev_forum.application.response.Response
 import com.dev_forum.application.validations.InvalidRequest
 import com.dev_forum.domain.entities.Article
@@ -11,6 +13,7 @@ import com.dev_forum.domain.repositories.ArticleRepository
 import com.dev_forum.domain.repositories.TagRepository
 import com.dev_forum.domain.service.ArticleService
 import com.dev_forum.domain.service.UserService
+import com.github.slugify.Slugify
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.http.HttpStatus

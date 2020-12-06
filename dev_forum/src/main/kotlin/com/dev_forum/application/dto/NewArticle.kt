@@ -4,9 +4,6 @@ import com.dev_forum.domain.entities.Article
 import com.dev_forum.domain.entities.Tag
 import java.text.SimpleDateFormat
 import java.time.LocalDateTime
-import java.time.OffsetDateTime
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 import javax.validation.constraints.NotEmpty
 
 data class NewArticle(
