@@ -1,4 +1,4 @@
- ### Personal project Kotlin and Spring Boot based on forums for developers
+ ### Personal project Kotlin and Spring Boot WebSocket on a simple forum for developers
  
  # Getting started
  
